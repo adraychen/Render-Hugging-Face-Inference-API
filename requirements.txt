@@ -1,7 +1,9 @@
 fastapi
 uvicorn
-httpx
 python-multipart
 pdfplumber
 openpyxl
 pandas
+httpx
+supabase
+python-dotenv
