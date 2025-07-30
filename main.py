@@ -34,17 +34,15 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 # Hugging Face inference endpoint
 HF_API_URL = "https://api-inference.huggingface.co/models/sentence-transformers/all-MiniLM-L6-v2"
 
-
-
 def get_embedding(text: str) -> List[float]:
     headers = {
         "Authorization": f"Bearer {HUGGINGFACE_TOKEN}",
         "Content-Type": "application/json",
     }
-    payload = {"inputs": text}
+    payload = {"inputs": [text]}  # ✅ wrap text in a list
     response = httpx.post(HF_API_URL, json=payload, headers=headers)
     response.raise_for_status()
-    return response.json()["embedding"]
+    return response.json()[0]  # ✅ returns a list of embeddings
 
 
 def parse_pdf(file_bytes: bytes) -> pd.DataFrame:
