@@ -49,8 +49,8 @@ def get_embedding(text: str) -> list[float]:
     # API returns a list of embeddings for each input in the list
     result = response.json()
 
-    if isinstance(result, list) and "embedding" in result[0]:
-        return result[0]["embedding"]  # Single sentence => result[0]
+    if isinstance(result, list) and isinstance(result[0], list):
+        return result[0] 
     else:
         raise ValueError("Unexpected response from Hugging Face API")
 
