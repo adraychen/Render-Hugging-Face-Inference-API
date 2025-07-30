@@ -39,22 +39,25 @@ def get_embedding(text: str) -> List[float]:
         "Authorization": f"Bearer {HUGGINGFACE_TOKEN}",
         "Content-Type": "application/json",
     }
+
     payload = {
-        "inputs": [text],
-        "model": "sentence-transformers/all-MiniLM-L6-v2"
+        "inputs": [text]
     }
-    print("👉 Sending payload to Hugging Face:", payload)
 
     response = httpx.post(HF_API_URL, json=payload, headers=headers)
 
     try:
         response.raise_for_status()
     except httpx.HTTPStatusError as e:
-        print("❌ Hugging Face response error:", e.response.text)
+        print("❌ Hugging Face error:", e.response.text)
         raise
 
-    print("✅ Hugging Face returned:", response.json())
-    return response.json()["embeddings"][0]
+    data = response.json()
+    if isinstance(data, dict) and "error" in data:
+        raise Exception(data["error"])
+    
+    return data[0]["embedding"]
+
 
 def parse_pdf(file_bytes: bytes) -> pd.DataFrame:
     with pdfplumber.open(io.BytesIO(file_bytes)) as pdf:
