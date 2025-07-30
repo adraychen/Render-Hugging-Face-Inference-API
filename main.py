@@ -31,28 +31,24 @@ HUGGINGFACE_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
 # Supabase client
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# Updated Hugging Face endpoint
-HF_API_URL = "https://api-inference.huggingface.co/models/sentence-transformers/all-MiniLM-L6-v2"
-
+HF_API_URL = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2"
 
 def get_embedding(text: str) -> list[float]:
     headers = {
         "Authorization": f"Bearer {HUGGINGFACE_TOKEN}",
         "Content-Type": "application/json",
     }
-    payload = {
-        "inputs": [text]  # Wrap text in a list
-    }
-    response = httpx.post(HF_API_URL, json=payload, headers=headers)
+    payload = { "inputs": [text] }
+
+    response = httpx.post(HF_API_URL, headers=headers, json=payload)
     response.raise_for_status()
 
-    # API returns a list of embeddings for each input in the list
     result = response.json()
 
     if isinstance(result, list) and isinstance(result[0], list):
-        return result[0] 
+        return result[0]  # The embedding for the input sentence
     else:
-        raise ValueError("Unexpected response from Hugging Face API")
+        raise ValueError("Unexpected response format from Hugging Face API")
 
 
 def parse_pdf(file_bytes: bytes) -> pd.DataFrame:
