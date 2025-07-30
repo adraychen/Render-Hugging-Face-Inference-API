@@ -35,29 +35,24 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 HF_API_URL = "https://api-inference.huggingface.co/models/sentence-transformers/all-MiniLM-L6-v2"
 
 
-def get_embedding(text: str) -> List[float]:
+def get_embedding(text: str) -> list[float]:
     headers = {
         "Authorization": f"Bearer {HUGGINGFACE_TOKEN}",
         "Content-Type": "application/json",
     }
-
     payload = {
-        "inputs": [text]
+        "inputs": [text]  # Wrap text in a list
     }
-
     response = httpx.post(HF_API_URL, json=payload, headers=headers)
+    response.raise_for_status()
 
-    try:
-        response.raise_for_status()
-    except httpx.HTTPStatusError as e:
-        print("❌ Hugging Face error:", e.response.text)
-        raise
+    # API returns a list of embeddings for each input in the list
+    result = response.json()
 
-    data = response.json()
-    if isinstance(data, dict) and "error" in data:
-        raise Exception(data["error"])
-    
-    return data[0]["embedding"]
+    if isinstance(result, list) and "embedding" in result[0]:
+        return result[0]["embedding"]  # Single sentence => result[0]
+    else:
+        raise ValueError("Unexpected response from Hugging Face API")
 
 
 def parse_pdf(file_bytes: bytes) -> pd.DataFrame:
