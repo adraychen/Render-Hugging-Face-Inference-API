@@ -39,10 +39,11 @@ def get_embedding(text: str) -> List[float]:
         "Authorization": f"Bearer {HUGGINGFACE_TOKEN}",
         "Content-Type": "application/json",
     }
-    payload = {"inputs": [text]}  # ✅ wrap text in a list
+    payload = {"inputs": [text]}
+    print("Sending payload to HF:", payload)
     response = httpx.post(HF_API_URL, json=payload, headers=headers)
     response.raise_for_status()
-    return response.json()[0]  # ✅ returns a list of embeddings
+    return response.json()[0]
 
 
 def parse_pdf(file_bytes: bytes) -> pd.DataFrame:
